@@ -1,12 +1,16 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Accelerometer, Gyroscope } from "expo-sensors";
-
+import { bundleResourceIO } from "@tensorflow/tfjs-react-native";
+import * as tf from "@tensorflow/tfjs";
+import { input } from "./input";
 export default function App() {
     const [dataArr, setData] = useState([]);
     const [dataArr2, setData2] = useState([]);
     const [aData, setAData] = useState({});
     const [gData, setGData] = useState({});
+    const [outcome, setOutcome] = useState("");
+    const [fallDetector, setFallDetector] = useState("");
     // const [f1, setF1] = useState(0);
     // const [f2, setF2] = useState(0);
     const valueCount = 952;
@@ -22,6 +26,30 @@ export default function App() {
                 [[gyroData.x], [gyroData.y], [gyroData.z]],
             ]);
         });
+    }
+
+    useEffect(() => {
+        async function loadModel() {
+            try {
+                const tfReady = await tf.ready();
+                const modelJson = await require("./assets/model/model.json");
+                const modelWeight = await require("./assets/model/weights.bin");
+                const fallDetector = await tf.loadLayersModel(
+                    bundleResourceIO(modelJson, modelWeight)
+                );
+                setFallDetector(fallDetector);
+                // console.log(fallDetector);
+                console.log("[+]Model Loaded");
+            } catch (e) {
+                console.log(e);
+            }
+        }
+        loadModel();
+    }, []);
+
+    async function getResult(res) {
+        let result = await fallDetector.predict(tf.tensor([res])).data();
+        setOutcome(result[0] ? "Not Fall" : "Fall");
     }
 
     useEffect(() => {
@@ -66,10 +94,17 @@ export default function App() {
             for (let i = 0; i < valueCount; i++) {
                 res.push([...dataArr[i], ...dataArr2[i]]);
             }
+            getResult(res);
             // ans.push(res);
-            console.log(res);
+            console.log(res.length);
+            // console.log(res);
         }
     }, [dataArr, dataArr2]);
+
+    // async function getResult() {
+    //     let result = await fallDetector.predict(input);
+    //     console.log(result);
+    // }
 
     return (
         <View style={styles.mcont}>
@@ -85,6 +120,11 @@ export default function App() {
                 <Text style={styles.text}>y: {gData.y}</Text>
                 <Text style={styles.text}>z: {gData.z}</Text>
             </View>
+            {outcome !== "" && (
+                <View style={styles.container}>
+                    <Text style={styles.text}>Outcome: {outcome}</Text>
+                </View>
+            )}
         </View>
     );
 }
