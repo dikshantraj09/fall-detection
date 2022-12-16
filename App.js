@@ -15,8 +15,8 @@ const App = () => {
                     component={HomeScreen}
                     options={{ title: "Welcome" }}
                 />
-                <Stack.Screen name="Gyroscope" component={Gyroscope} />
-                <Stack.Screen name="Accelerometer" component={Accelerometer} />
+                <Stack.Screen name="Call Screen" component={Gyroscope} />
+                <Stack.Screen name="Detect Fall" component={Accelerometer} />
             </Stack.Navigator>
         </NavigationContainer>
     );

@@ -4,7 +4,8 @@ import { Accelerometer, Gyroscope } from "expo-sensors";
 import { bundleResourceIO } from "@tensorflow/tfjs-react-native";
 import * as tf from "@tensorflow/tfjs";
 import { input } from "./input";
-export default function App() {
+export default function App({navigation}) {
+    const threshold = 0.83;
     const [dataArr, setData] = useState([]);
     const [dataArr2, setData2] = useState([]);
     const [aData, setAData] = useState({});
@@ -16,14 +17,14 @@ export default function App() {
     const valueCount = 952;
 
     function startGyro() {
-        Gyroscope.setUpdateInterval(20);
+        Gyroscope.setUpdateInterval(4);
         Gyroscope.addListener((gyroData) => {
             // arr.push([[accData.x], [accData.y], [accData.z]]);
             // setData(arr);
             setGData(gyroData);
             setData2((prevData) => [
                 ...prevData,
-                [[gyroData.x], [gyroData.y], [gyroData.z]],
+                [[gyroData.x * 100], [gyroData.y * 100], [gyroData.z * 100]],
             ]);
         });
     }
@@ -49,7 +50,12 @@ export default function App() {
 
     async function getResult(res) {
         let result = await fallDetector.predict(tf.tensor([res])).data();
-        setOutcome(result[0] ? "Not Fall" : "Fall");
+        console.log(
+            "Result: ",
+            result[0] 
+        );
+        setOutcome(result[0] > threshold ? "Not Fall" : "Fall");
+        return result[0]<threshold && navigation.navigate("Call Screen");
     }
 
     useEffect(() => {
@@ -61,14 +67,14 @@ export default function App() {
     }, []);
 
     function startAccelerometer() {
-        Accelerometer.setUpdateInterval(20);
+        Accelerometer.setUpdateInterval(4);
         Accelerometer.addListener((accData) => {
             // arr.push([[accData.x], [accData.y], [accData.z]]);
             // setData(arr);
             setAData(accData);
             setData((prevData) => [
                 ...prevData,
-                [[accData.x], [accData.y], [accData.z]],
+                [[accData.x * 100], [accData.y * 100], [accData.z * 100]],
             ]);
         });
     }
@@ -110,19 +116,28 @@ export default function App() {
         <View style={styles.mcont}>
             <View style={styles.container}>
                 <Text style={styles.text}>Accelerometer:</Text>
-                <Text style={styles.text}>x: {aData.x}</Text>
-                <Text style={styles.text}>y: {aData.y}</Text>
-                <Text style={styles.text}>z: {aData.z}</Text>
+                <Text style={styles.text}>x: {aData.x * 100}</Text>
+                <Text style={styles.text}>y: {aData.y * 100}</Text>
+                <Text style={styles.text}>z: {aData.z * 100}</Text>
             </View>
             <View style={styles.container}>
                 <Text style={styles.text}>Gyroscope:</Text>
-                <Text style={styles.text}>x: {gData.x}</Text>
-                <Text style={styles.text}>y: {gData.y}</Text>
-                <Text style={styles.text}>z: {gData.z}</Text>
+                <Text style={styles.text}>x: {gData.x * 100}</Text>
+                <Text style={styles.text}>y: {gData.y * 100}</Text>
+                <Text style={styles.text}>z: {gData.z * 100}</Text>
             </View>
             {outcome !== "" && (
                 <View style={styles.container}>
-                    <Text style={styles.text}>Outcome: {outcome}</Text>
+                    <Text style={styles.textt}>
+                        Outcome:{" "}
+                        <Text
+                            style={
+                                outcome === "Fall" ? styles.fall : styles.noFall
+                            }
+                        >
+                            {outcome}
+                        </Text>
+                    </Text>
                 </View>
             )}
         </View>
@@ -158,5 +173,19 @@ const styles = StyleSheet.create({
         borderLeftWidth: 1,
         borderRightWidth: 1,
         borderColor: "#ccc",
+    },
+    textt: {
+        textAlign: "center",
+        fontSize: 20,
+        color: "black",
+        fontWeight: "bold",
+    },
+
+    fall: {
+        color: "red",
+    },
+
+    noFall: {
+        color: "green",
     },
 });

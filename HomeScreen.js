@@ -5,16 +5,16 @@ const HomeScreen = ({ navigation }) => {
     return (
         <View style={styles.container}>
             <TouchableOpacity
-                onPress={() => navigation.navigate("Accelerometer")}
+                onPress={() => navigation.navigate("Detect Fall")}
                 style={styles.button}
             >
                 <Text>View Accelerometer Data</Text>
             </TouchableOpacity>
             <TouchableOpacity
-                onPress={() => navigation.navigate("Gyroscope")}
+                onPress={() => navigation.navigate("Call Screen")}
                 style={styles.button}
             >
-                <Text> View Gyroscope Data </Text>
+                <Text> View Call Screen </Text>
             </TouchableOpacity>
         </View>
     );
