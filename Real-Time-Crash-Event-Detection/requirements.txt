@@ -1,0 +1,7 @@
+keras
+librosa
+matplotlib
+numpy
+sounddevice
+pandas
+pyaudio
