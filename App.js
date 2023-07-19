@@ -17,6 +17,7 @@ const App = () => {
                 />
                 <Stack.Screen name="Call Screen" component={Gyroscope} />
                 <Stack.Screen name="Detect Fall" component={Accelerometer} />
+                <Stack.Screen name="Detect Accident" component={Accelerometer} />
             </Stack.Navigator>
         </NavigationContainer>
     );
